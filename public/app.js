@@ -1,36 +1,54 @@
 const products = [
- {name:'Oud Al Hejaz', subtitle:'Royal Oud', notes:'Smoky · Woody · Royal', size:'50ml Eau de Parfum', price:4999,old:6999,usd:18,detail:'12+ hours lasting',color:'oud',tag:'THE SIGNATURE',label:'OUD'},
- {name:'White Musk Tahara',subtitle:'Soft & Serene',notes:'Clean · Soft · Daily wear',size:'50ml',price:2499,usd:9,detail:'For every day & prayer',color:'musk',tag:'EVERYDAY FAVOURITE',label:'MUSK'},
- {name:'Rose Taif',subtitle:'The Rose of Taif',notes:'Floral · Delicate · Timeless',size:'50ml · Rose from Taif, Saudi Arabia',price:3999,usd:14,detail:'For women & men',color:'rose',tag:'FLORAL ESSENTIAL',label:'ROSE'},
- {name:'Amber & Musk Attar',subtitle:'A Precious Ritual',notes:'Warm · Pure · Alcohol-free',size:'12ml Attar Oil',price:1499,usd:6,detail:'Sunnah attar',color:'attar',tag:'ALCOHOL-FREE',label:'ATTAR'},
- {name:'Amber Gold',subtitle:'After Dark',notes:'Warm · Sweet · Evening',size:'100ml',price:5999,usd:21,detail:'For celebrations & weddings',color:'amber',tag:'EVENING LUXURY',label:'AMBER'},
- {name:'Hejaz Gift Box',subtitle:'Three Little Treasures',notes:'Oud · Musk · Rose',size:'3 × 12ml Attars · Gift-ready box',price:3499,old:4999,usd:12,detail:'A gift for Umrah & Eid',color:'gift',tag:'THE PERFECT GIFT',label:'HEJAZ'}
+ {name:'GORGEOUS',subtitle:'5ml Tester',notes:'Signature tester',size:'5ml Tester',price:499,detail:'Try it before the full bottle',color:'rose',tag:'TESTER',label:'GORGEOUS',msg:'I want GORGEOUS 5ml Rs 499'},
+ {name:'GLORY',subtitle:'5ml Tester',notes:'Signature tester',size:'5ml Tester',price:499,detail:'Try it before the full bottle',color:'amber',tag:'TESTER',label:'GLORY',msg:'I want GLORY 5ml Rs 499'},
+ {name:'SAUVAGE',subtitle:'5ml Tester',notes:'Signature tester',size:'5ml Tester',price:499,detail:'Try it before the full bottle',color:'oud',tag:'TESTER',label:'SAUVAGE',msg:'I want SAUVAGE 5ml Rs 499'},
+ {name:'Trio Tester Pack',subtitle:'3 × 5ml',notes:'Gorgeous · Glory · Sauvage',size:'3 × 5ml Testers',price:1199,detail:'Discover all three scents',color:'gift',tag:'BEST VALUE',label:'TRIO',msg:'I want TRIO PACK Rs 1199',cta:'Order Trio Pack'},
+ {name:'Full Bottle 30ml',subtitle:'30ml',notes:'Your chosen scent',size:'30ml Full Bottle',price:2999,detail:'Choose your scent on WhatsApp',color:'musk',tag:'FULL BOTTLE',label:'30ML',msg:'I want FULL BOTTLE 30ml Rs 2999',cta:'Order Full Bottle',pick:true},
+ {name:'Full Bottle 50ml',subtitle:'50ml',notes:'Your chosen scent',size:'50ml Full Bottle',price:4499,detail:'Free delivery in Pakistan',color:'attar',tag:'FREE DELIVERY',label:'50ML',msg:'I want FULL BOTTLE 50ml Rs 4499',cta:'Order Full Bottle',pick:true}
 ];
+const DELIVERY = 250, FREE_OVER = 3000;
 const money = value => 'Rs. ' + value.toLocaleString('en-PK');
 const whatsapp = text => 'https://wa.me/923450200567?text=' + encodeURIComponent(text);
-const bottle = p => `<div class="bottle"><div class="cap"></div><div class="bottle-body"><div class="bottle-label"><small>AL HEJAZ</small><strong>${p.label}</strong><span>e - PERFUME</span></div></div></div>`;
-document.querySelector('#products').innerHTML = products.map((p,i) => `<article class="product-card"><div class="product-art ${p.color}"><span class="product-tag">${p.tag}</span><div class="bottle-scene" aria-hidden="true">${p.color==='gift'?`<div class="gift-box"></div>`:''}${bottle(p)}${p.color==='gift'?bottle({...p,label:'MUSK'})+bottle({...p,label:'ROSE'}):''}</div><span class="art-size">${p.size}</span></div><div class="product-info"><p class="product-notes">${p.notes}</p><h3>${p.name}</h3><p class="product-detail">${p.detail} <span>· $${p.usd} USD</span></p><div class="product-bottom"><div class="price">${money(p.price)} ${p.old?`<s>${money(p.old)}</s>`:''}</div><a href="${whatsapp(`Assalam-o-Alaikum! I would like to order ${p.name} (${p.size}) — ${money(p.price)}. Please confirm availability and delivery charges.`)}" aria-label="Order ${p.name} on WhatsApp">Order <span aria-hidden="true">↗</span></a></div></div></article>`).join('');
+const delivery = subtotal => subtotal > FREE_OVER ? 0 : DELIVERY;
+const bottle = p => `<div class="bottle"><div class="cap"></div><div class="bottle-body"><div class="bottle-label"><small>AL HIJAZI</small><strong${p.label.length>5?' class="long"':''}>${p.label}</strong><span>FRAGRANCE</span></div></div></div>`;
+document.querySelector('#products').innerHTML = products.map(p => `<article class="product-card"><div class="product-art ${p.color}"><span class="product-tag">${p.tag}</span><div class="bottle-scene" aria-hidden="true">${p.color==='gift'?`<div class="gift-box"></div>`+bottle({label:'GORGEOUS'})+bottle({label:'GLORY'})+bottle({label:'SAUVAGE'}):bottle(p)}</div><span class="art-size">${p.size}</span></div><div class="product-info"><p class="product-notes">${p.notes}</p><h3>${p.name}</h3><p class="product-detail">${p.detail}</p><div class="product-bottom"><div class="price">${money(p.price)}</div><a href="${whatsapp(p.msg)}" aria-label="${p.cta||'Order'} — ${p.name} ${p.size} on WhatsApp">${p.cta||'Order on WhatsApp'} <span aria-hidden="true">↗</span></a></div></div></article>`).join('');
 const select = document.querySelector('#product');
-products.forEach((p,i)=>select.add(new Option(`${p.name} — ${money(p.price)}`,String(i))));
+products.forEach((p,i)=>select.add(new Option(`${p.name} (${p.size}) — ${money(p.price)}`,String(i))));
 const form = document.querySelector('#order-form');
 const total = document.querySelector('#order-total');
+const scentField = document.querySelector('#scent-field');
+const scent = form.elements.scent;
+function syncScent(){
+ const p = products[select.value];
+ const needed = Boolean(p && p.pick);
+ scentField.hidden = !needed;
+ scent.required = needed;
+ if(!needed) scent.value = '';
+}
 function updateTotal(){
+ syncScent();
  const p = products[select.value];
  const quantity = Number(form.elements.quantity.value);
- if(!p || !Number.isInteger(quantity) || quantity<1 || quantity>99){total.textContent='Select a fragrance and valid quantity to see your subtotal.';return;}
- const domestic = form.elements.country.value==='Pakistan';
- total.textContent = domestic ? `Subtotal: ${money(p.price*quantity)} + Rs. 250 delivery = ${money(p.price*quantity+250)}` : `Subtotal: ${money(p.price*quantity)} · Delivery confirmed on WhatsApp`;
+ if(!p || !Number.isInteger(quantity) || quantity<1 || quantity>99){total.textContent='Select a product and valid quantity to see your subtotal.';return;}
+ const subtotal = p.price*quantity;
+ if(form.elements.country.value!=='Pakistan'){total.textContent=`Subtotal: ${money(subtotal)} · Delivery confirmed on WhatsApp`;return;}
+ const fee = delivery(subtotal);
+ total.textContent = fee ? `Subtotal: ${money(subtotal)} + ${money(fee)} delivery = ${money(subtotal+fee)} · Cash on Delivery` : `Subtotal: ${money(subtotal)} + FREE delivery = ${money(subtotal)} · Cash on Delivery`;
 }
 form.addEventListener('input',updateTotal);
 form.addEventListener('change',updateTotal);
 form.addEventListener('submit',event=>{
  event.preventDefault();
+ syncScent();
  if(!form.reportValidity()) return;
  const data = new FormData(form);
  const p = products[data.get('product')];
  const quantity = Number(data.get('quantity'));
  if(!p || !Number.isInteger(quantity) || quantity<1 || quantity>99) return;
- const message = `Assalam-o-Alaikum Al Hejaz-e-Perfume!\nI would like to place an order.\n\nProduct: ${p.name} (${p.size})\nQuantity: ${quantity}\nUnit price: ${money(p.price)}\nSubtotal: ${money(p.price*quantity)}\n${data.get('country')==='Pakistan'?`Delivery: Rs. 250\nTotal: ${money(p.price*quantity+250)}`:'International delivery: please confirm charges'}\n\nName: ${data.get('name').trim()}\nWhatsApp: ${data.get('phone').trim()}\nCountry: ${data.get('country')}\nDelivery address: ${data.get('address').trim()}\n\nPlease confirm availability, payment details and delivery.`;
+ const subtotal = p.price*quantity;
+ const fee = delivery(subtotal);
+ const domestic = data.get('country')==='Pakistan';
+ const message = `Assalam-o-Alaikum Al Hijazi Fragrance!\nI would like to place an order.\n\nProduct: ${p.name} (${p.size})${p.pick?`\nScent: ${data.get('scent')}`:''}\nQuantity: ${quantity}\nUnit price: ${money(p.price)}\nSubtotal: ${money(subtotal)}\n${domestic?`Delivery: ${fee?money(fee):'FREE'}\nTotal: ${money(subtotal+fee)}\nPayment: Cash on Delivery`:'International delivery: please confirm charges'}\n\nName: ${data.get('name').trim()}\nWhatsApp: ${data.get('phone').trim()}\nCountry: ${data.get('country')}\nDelivery address: ${data.get('address').trim()}\n\nPlease confirm availability and delivery.`;
  document.querySelector('#form-status').textContent='Opening WhatsApp. Please send the prepared message to complete your order request.';
  window.location.assign(whatsapp(message));
 });
